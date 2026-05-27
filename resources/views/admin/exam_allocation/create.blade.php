@@ -93,12 +93,13 @@
     @endif
 </div>
 
-                    <div class="col-md-6 col-lg-5">
+                    <div class="col-md-6 col-lg-4">
                         <label class="form-label fw-semibold text-secondary">
                             <i class="bi bi-calendar-check me-1"></i>Select Examination
                         </label>
                         <select name="exam_id" class="form-select form-select-lg" onchange="this.form.submit()" {{ !request('exam_date') ? 'disabled' : '' }}>
                             <option value="">-- Choose an exam --</option>
+                           
                             @foreach($exams as $exam)
                                 <option value="{{ $exam->id }}" {{ request('exam_id') == $exam->id ? 'selected' : '' }}>
                                     {{ $exam->subject->name ?? $exam->subject_name }}
@@ -118,6 +119,37 @@
                             <small class="text-muted">First select exam date, then select exam.</small>
                         @endif
                     </div>
+
+                    <div class="col-md-6 col-lg-5">
+    <label class="form-label fw-semibold text-secondary">
+        <i class="bi bi-mortarboard me-1"></i>Select Course
+    </label>
+
+    <select name="course" id="courseSelect"
+        class="form-select form-select-lg"
+        onchange="this.form.submit()"
+        {{ !request('exam_date') ? 'disabled' : '' }}>
+        
+        <option value="">-- Choose Course --</option>
+@php
+    $courses = \App\Models\Student::whereNotNull('class_name')
+        ->distinct()
+        ->pluck('class_name');
+@endphp
+
+        @foreach($courses as $course)
+            <option value="{{ $course }}"
+                {{ request('course') == $course ? 'selected' : '' }}>
+                {{ $course }}
+            </option>
+        @endforeach
+    </select>
+
+    <small class="text-muted">
+        Select course for seat allocation
+    </small>
+</div>
+
                 </form>
             </div>
         </div>
@@ -172,6 +204,24 @@
                         
                         <div class="card-body p-0">
                             <div id="studentList" class="list-group list-group-flush" style="max-height:520px; overflow-y:auto;">
+                                 
+
+                            @php
+
+if(request('course')) {
+
+    $students = $students->filter(function($student) {
+
+        return $student->class_name == request('course');
+
+    });
+
+}
+
+@endphp
+
+
+
                                 @forelse($students as $student)
                                     <div class="student-item list-group-item list-group-item-action d-flex align-items-center gap-3 border-0" 
                                         data-id="{{ $student->id }}" 
