@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\ExamClass;
 
 class ExamController extends Controller
 {
@@ -59,7 +60,8 @@ class ExamController extends Controller
             'exam_time' => 'required|date_format:H:i',
             'time_session' => 'required|in:FN,AN',
             'duration_minutes' => 'required|integer|min:1|max:200',
-            'instructions' => 'nullable|string'
+            'instructions' => 'nullable|string',
+'classes' => 'required|array|min:1',
         ]);
 
         // Check for schedule conflict
@@ -91,6 +93,16 @@ class ExamController extends Controller
             'allocation_status' => 'pending'
             // subject_name and subject_code will be auto-filled by boot method
         ]);
+
+        // SAVE SELECTED CLASSES
+foreach ($request->classes as $class) {
+
+    ExamClass::create([
+        'exam_id' => $exam->id,
+        'class_name' => $class
+    ]);
+
+}
 
         return redirect()->route('admin.exams.index')
             ->with('success', 'Exam scheduled successfully!');

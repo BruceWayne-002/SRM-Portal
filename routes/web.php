@@ -115,7 +115,8 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     
      // Subjects
     Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
-
+    // Subjects
+Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
     // Exam Timetable Routes
     Route::get('/exam-timetable', [ExamTimetableController::class, 'index'])->name('exam-timetable.index');
     Route::get('/exam-timetable/class/{class}', [ExamTimetableController::class, 'showClassExams'])->name('exam-timetable.class-exams');

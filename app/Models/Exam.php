@@ -590,4 +590,9 @@ class Exam extends Model
                     ->withTimestamps();
     }
 
+public function classes()
+{
+    return $this->hasMany(\App\Models\ExamClass::class);
+}
+
 }

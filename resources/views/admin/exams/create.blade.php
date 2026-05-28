@@ -1,220 +1,559 @@
+```php
 @extends('layouts.app')
 
 @section('title', 'Schedule New Exam')
 
 @section('main')
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">Schedule New Exam</h5>
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-white">
+        <h4 class="mb-0 fw-bold">
+            Schedule New Exam
+        </h4>
     </div>
+
     <div class="card-body">
+
         <form action="{{ route('admin.exams.store') }}" method="POST">
             @csrf
-            
+
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="subject_id" class="form-label">Subject *</label>
-                    <select class="form-select @error('subject_id') is-invalid @enderror"
-                            id="subject_id" name="subject_id" required>
-                        <option value="">-- Select Subject --</option>
-                        @foreach($subjects as $subject)
-                            <option value="{{ $subject->id }}" 
-                                    data-duration="{{ $subject->duration_hours }}"
-                                    data-code="{{ $subject->code }}"
-                                    data-name="{{ $subject->name }}"
-                                    data-class="{{ $subject->class_name }}"
-                                    {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
-                                {{ $subject->class_name }} | {{ $subject->code }} - {{ $subject->name }}
+
+                {{-- SUBJECT --}}
+                <div class="col-md-6 mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Subject *
+                    </label>
+
+                    <select
+                        class="form-select @error('subject_id') is-invalid @enderror"
+                        id="subject_id"
+                        name="subject_id"
+                        required
+                    >
+
+                        <option value="">
+                            -- Select Subject --
+                        </option>
+
+                        @php
+
+                            $uniqueSubjects = $subjects
+                                ->unique(function ($item) {
+                                    return strtolower($item->code . '-' . $item->name);
+                                });
+
+                        @endphp
+
+                        @foreach($uniqueSubjects as $subject)
+
+                            <option
+                                value="{{ $subject->id }}"
+                                data-duration="{{ $subject->duration_hours }}"
+                                data-code="{{ $subject->code }}"
+                                data-name="{{ $subject->name }}"
+                            >
+
+                                {{ $subject->code }}
+                                -
+                                {{ $subject->name }}
+
                             </option>
+
                         @endforeach
+
                     </select>
+
                     @error('subject_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                     @enderror
-                    
-                    <!-- Selected Subject Preview -->
-                    <div id="subjectPreview" class="mt-2 p-2 bg-light rounded d-none">
-                        <small class="text-muted">Selected Subject:</small><br>
-                        <span id="selectedSubjectInfo"></span>
+
+                    {{-- SUBJECT PREVIEW --}}
+                    <div
+                        id="subjectPreview"
+                        class="mt-3 p-3 bg-light rounded border d-none"
+                    >
+
+                        <small class="text-muted">
+                            Selected Subject
+                        </small>
+
+                        <div id="selectedSubjectInfo"></div>
+
                     </div>
+
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="exam_type" class="form-label">Exam Type *</label>
-                    <select class="form-select @error('exam_type') is-invalid @enderror" 
-                            id="exam_type" name="exam_type" required>
-                        <option value="">Select Type</option>
-                        <option value="midterm" {{ old('exam_type') == 'midterm' ? 'selected' : '' }}>Midterm</option>
-                        <option value="final" {{ old('exam_type') == 'final' ? 'selected' : '' }}>Final</option>
-                        <option value="quiz" {{ old('exam_type') == 'quiz' ? 'selected' : '' }}>Quiz</option>
-                        <option value="assignment" {{ old('exam_type') == 'assignment' ? 'selected' : '' }}>Assignment</option>
+                {{-- EXAM TYPE --}}
+                <div class="col-md-6 mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Exam Type *
+                    </label>
+
+                    <select
+                        class="form-select @error('exam_type') is-invalid @enderror"
+                        name="exam_type"
+                        required
+                    >
+
+                        <option value="">
+                            Select Type
+                        </option>
+
+                        <option value="midterm">
+                            Midterm
+                        </option>
+
+                        <option value="final">
+                            Final
+                        </option>
+
+                        <option value="quiz">
+                            Quiz
+                        </option>
+
+                        <option value="assignment">
+                            Assignment
+                        </option>
+
                     </select>
-                    @error('exam_type')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="exam_date" class="form-label">Exam Date *</label>
-                    <input type="date" class="form-control @error('exam_date') is-invalid @enderror" 
-                           id="exam_date" name="exam_date" value="{{ old('exam_date') }}" required>
-                    @error('exam_date')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                {{-- EXAM DATE --}}
+                <div class="col-md-6 mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Exam Date *
+                    </label>
+
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="exam_date"
+                        name="exam_date"
+                        required
+                    >
+
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="exam_time" class="form-label">Exam Time *</label>
-                    <input type="time" class="form-control @error('exam_time') is-invalid @enderror" 
-                           id="exam_time" name="exam_time" value="{{ old('exam_time') }}" required>
-                    @error('exam_time')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                {{-- EXAM TIME --}}
+                <div class="col-md-6 mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Exam Time *
+                    </label>
+
+                    <input
+                        type="time"
+                        class="form-control"
+                        id="exam_time"
+                        name="exam_time"
+                        required
+                    >
+
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="time_session" class="form-label">Time Session *</label>
-                    <div class="border p-3 rounded">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="time_session" 
-                                   id="fn" value="FN" 
-                                   {{ old('time_session') == 'FN' ? 'checked' : '' }}>
+                {{-- TIME SESSION --}}
+                <div class="col-md-6 mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Time Session *
+                    </label>
+
+                    <div class="border rounded p-3">
+
+                        <div class="form-check mb-2">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="time_session"
+                                id="fn"
+                                value="FN"
+                            >
+
                             <label class="form-check-label" for="fn">
-                                <strong>FN</strong> (Forenoon - Before 12:00 PM)
+                                <strong>FN</strong>
+                                (Forenoon)
                             </label>
+
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="time_session" 
-                                   id="an" value="AN" 
-                                   {{ old('time_session') == 'AN' ? 'checked' : '' }}>
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="time_session"
+                                id="an"
+                                value="AN"
+                            >
+
                             <label class="form-check-label" for="an">
-                                <strong>AN</strong> (Afternoon - 12:00 PM & After)
+                                <strong>AN</strong>
+                                (Afternoon)
                             </label>
+
                         </div>
+
                     </div>
-                    @error('time_session')
-                        <div class="text-danger small mt-1">{{ $message }}</div>
-                    @enderror
+
                 </div>
 
-                <div class="col-md-6 mb-3">
-    <label for="duration_minutes" class="form-label">Duration *</label>
-    <div class="input-group">
-        <input type="number" 
-               class="form-control @error('duration_minutes') is-invalid @enderror" 
-               id="duration_minutes" 
-               name="duration_minutes" 
-               value="{{ old('duration_minutes') }}"
-               min="1"
-               max="200"
-               step="1"
-               placeholder="Enter duration (Max 200 mins)">
-        <span class="input-group-text">minutes</span>
-    </div>
+                {{-- DURATION --}}
+                <div class="col-md-6 mb-4">
 
-    @error('duration_minutes')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
+                    <label class="form-label fw-semibold">
+                        Duration *
+                    </label>
 
-    <small class="text-muted">
-        <i class="fas fa-info-circle"></i> Maximum allowed duration is 200 minutes
-    </small>
-</div>
+                    <div class="input-group">
 
-                <div class="col-md-12 mb-3">
-                    <label for="instructions" class="form-label">Instructions</label>
-                    <textarea class="form-control @error('instructions') is-invalid @enderror" 
-                              id="instructions" name="instructions" rows="4" 
-                              placeholder="Enter exam instructions, rules, or special notes...">{{ old('instructions') }}</textarea>
-                    @error('instructions')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="duration_minutes"
+                            name="duration_minutes"
+                            placeholder="Enter duration"
+                            max="200"
+                        >
+
+                        <span class="input-group-text">
+                            minutes
+                        </span>
+
+                    </div>
+
+                    <small class="text-muted">
+                        Maximum allowed duration is 200 minutes
+                    </small>
+
                 </div>
+
+                {{-- CLASS SELECTION --}}
+                <div class="col-md-12 mb-4">
+
+                    <div class="card border shadow-sm">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        🎓 Select Courses / Classes
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Choose which departments are writing this exam
+                                    </small>
+
+                                </div>
+
+                                <span class="badge bg-primary fs-6">
+                                    <span id="selectedCount">0</span>
+                                    Selected
+                                </span>
+
+                            </div>
+
+                            {{-- SEARCH --}}
+                            <div class="mb-3">
+
+                                <input
+                                    type="text"
+                                    id="classSearch"
+                                    class="form-control"
+                                    placeholder="Search class..."
+                                >
+
+                            </div>
+
+                            @php
+
+                                $classes = \App\Models\Student::select('class_name')
+                                    ->whereNotNull('class_name')
+                                    ->distinct()
+                                    ->orderBy('class_name')
+                                    ->pluck('class_name');
+
+                            @endphp
+
+                            <div
+                                class="border rounded p-3 bg-light"
+                                style="max-height: 300px; overflow-y:auto;"
+                            >
+
+                                <div class="row">
+
+                                    @foreach($classes as $class)
+
+                                        <div
+                                            class="col-md-4 mb-3 class-item"
+                                            data-name="{{ strtolower($class) }}"
+                                        >
+
+                                            <div class="border rounded bg-white p-3 h-100">
+
+                                                <div class="form-check">
+
+                                                    <input
+                                                        type="checkbox"
+                                                        class="form-check-input class-checkbox"
+                                                        name="classes[]"
+                                                        value="{{ $class }}"
+                                                        id="class_{{ $loop->index }}"
+                                                    >
+
+                                                    <label
+                                                        class="form-check-label fw-semibold ms-2"
+                                                        for="class_{{ $loop->index }}"
+                                                    >
+
+                                                        {{ $class }}
+
+                                                    </label>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    @endforeach
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {{-- INSTRUCTIONS --}}
+                <div class="col-md-12 mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Instructions
+                    </label>
+
+                    <textarea
+                        class="form-control"
+                        name="instructions"
+                        rows="4"
+                        placeholder="Enter exam instructions..."
+                    ></textarea>
+
+                </div>
+
             </div>
 
-            <div class="d-flex justify-content-between mt-3">
-                <a href="{{ route('admin.exams.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
+            {{-- BUTTONS --}}
+            <div class="d-flex justify-content-between">
+
+                <a
+                    href="{{ route('admin.exams.index') }}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-calendar-plus"></i> Schedule Exam
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Schedule Exam
                 </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
+
 @endsection
 
+
 @push('scripts')
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Set minimum date to today
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // =========================
+    // MIN DATE
+    // =========================
+
     const today = new Date().toISOString().split('T')[0];
-    const examDateInput = document.getElementById('exam_date');
-    if (examDateInput) {
-        examDateInput.min = today;
-    }
-    
-    // Subject selection handling
-    const subjectSelect = document.getElementById('subject_id');
-    const durationInput = document.getElementById('duration_minutes');
-    const subjectPreview = document.getElementById('subjectPreview');
-    const selectedSubjectInfo = document.getElementById('selectedSubjectInfo');
-    
-    function updateSubjectDetails() {
-        const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
-        
-        if (selectedOption && selectedOption.value) {
-            // Update duration
-            const hours = selectedOption.dataset.duration;
-            if (hours) {
-                const minutes = parseInt(hours) * 60;
-                durationInput.value = minutes;
-            } else {
-                durationInput.value = '';
-            }
-            
-            // Update subject preview
-            const code = selectedOption.dataset.code || '';
-            const name = selectedOption.dataset.name || '';
-            const className = selectedOption.dataset.class || '';
-            
-            selectedSubjectInfo.innerHTML = `
-                <strong>${className}</strong> | ${code} - ${name}<br>
-                <span class="text-primary">Duration: ${hours} hour(s) (${parseInt(hours) * 60} minutes)</span>
+
+    document.getElementById('exam_date').min = today;
+
+    // =========================
+    // SUBJECT PREVIEW
+    // =========================
+
+    const subjectSelect =
+        document.getElementById('subject_id');
+
+    const durationInput =
+        document.getElementById('duration_minutes');
+
+    const preview =
+        document.getElementById('subjectPreview');
+
+    const previewInfo =
+        document.getElementById('selectedSubjectInfo');
+
+    function updateSubjectPreview() {
+
+        const option =
+            subjectSelect.options[subjectSelect.selectedIndex];
+
+        if(option.value){
+
+            const code = option.dataset.code;
+
+            const name = option.dataset.name;
+
+            const hours = option.dataset.duration;
+
+            const minutes = parseInt(hours) * 60;
+
+            durationInput.value = minutes;
+
+            previewInfo.innerHTML = `
+                <strong>${code}</strong><br>
+                ${name}<br>
+
+                <span class="text-primary">
+                    Duration: ${minutes} minutes
+                </span>
             `;
-            subjectPreview.classList.remove('d-none');
+
+            preview.classList.remove('d-none');
+
         } else {
+
+            preview.classList.add('d-none');
+
             durationInput.value = '';
-            subjectPreview.classList.add('d-none');
+
         }
+
     }
-    
-    subjectSelect.addEventListener('change', updateSubjectDetails);
-    
-    // Auto-select time session based on exam time
-    const examTimeInput = document.getElementById('exam_time');
-    const fnRadio = document.getElementById('fn');
-    const anRadio = document.getElementById('an');
-    
-    function updateTimeSession() {
-        if (examTimeInput.value) {
-            const hour = parseInt(examTimeInput.value.split(':')[0]);
-            if (hour < 12) {
-                fnRadio.checked = true;
-            } else {
-                anRadio.checked = true;
+
+    subjectSelect.addEventListener(
+        'change',
+        updateSubjectPreview
+    );
+
+    // =========================
+    // AUTO FN / AN
+    // =========================
+
+    const examTime =
+        document.getElementById('exam_time');
+
+    const fn =
+        document.getElementById('fn');
+
+    const an =
+        document.getElementById('an');
+
+    examTime.addEventListener('change', function(){
+
+        if(!this.value) return;
+
+        const hour =
+            parseInt(this.value.split(':')[0]);
+
+        if(hour < 12){
+
+            fn.checked = true;
+
+        } else {
+
+            an.checked = true;
+
+        }
+
+    });
+
+    // =========================
+    // SEARCH CLASS
+    // =========================
+
+    const searchInput =
+        document.getElementById('classSearch');
+
+    const classItems =
+        document.querySelectorAll('.class-item');
+
+    searchInput.addEventListener('keyup', function(){
+
+        const value = this.value.toLowerCase();
+
+        classItems.forEach(item => {
+
+            const name = item.dataset.name;
+
+            item.style.display =
+                name.includes(value)
+                ? 'block'
+                : 'none';
+
+        });
+
+    });
+
+    // =========================
+    // SELECTED COUNT
+    // =========================
+
+    const checkboxes =
+        document.querySelectorAll('.class-checkbox');
+
+    const selectedCount =
+        document.getElementById('selectedCount');
+
+    function updateCount(){
+
+        let count = 0;
+
+        checkboxes.forEach(box => {
+
+            if(box.checked){
+
+                count++;
+
             }
-        }
+
+        });
+
+        selectedCount.innerText = count;
+
     }
-    
-    examTimeInput.addEventListener('change', updateTimeSession);
-    examTimeInput.addEventListener('input', updateTimeSession);
-    
-    // Initialize if subject is pre-selected
-    if (subjectSelect.value) {
-        updateSubjectDetails();
-    }
+
+    checkboxes.forEach(box => {
+
+        box.addEventListener('change', updateCount);
+
+    });
+
 });
+
 </script>
+
 @endpush
+```

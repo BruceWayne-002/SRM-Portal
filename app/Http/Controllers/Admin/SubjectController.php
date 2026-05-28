@@ -215,4 +215,11 @@ class SubjectController extends Controller
         return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject deleted successfully!');
     }
+
+    public function show($id)
+{
+    $subject = \App\Models\Subject::findOrFail($id);
+
+    return view('admin.subjects.show', compact('subject'));
+}
 }

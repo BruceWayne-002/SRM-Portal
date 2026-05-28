@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use App\Models\ExamClass;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamHallAllocation;
@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 
 class CommonHallController extends Controller
 {
@@ -125,17 +126,21 @@ class CommonHallController extends Controller
     $otherExamAllocations = collect();
     $slotTeacher = null;
 
-    if ($request->exam_id) {
-        $selectedExam = Exam::with('subject')->findOrFail($request->exam_id);
+if ($request->exam_id) {
 
-        $subjectClassId = $selectedExam->subject->class_id ?? null;
-        $examSemester = $selectedExam->sem
-            ?? $selectedExam->semester
-            ?? $selectedExam->current_semester
-            ?? null;
+    $selectedExam = Exam::with('subject')->findOrFail($request->exam_id);
 
-        $allExamAllocationIds = ExamHallAllocation::where('exam_id', $selectedExam->id)
-            ->pluck('id');
+    $classNames = ExamClass::where('exam_id', $selectedExam->id)
+        ->pluck('class_name')
+        ->toArray();
+
+    $examSemester = $selectedExam->sem
+        ?? $selectedExam->semester
+        ?? $selectedExam->current_semester
+        ?? null;
+
+    $allExamAllocationIds = ExamHallAllocation::where('exam_id', $selectedExam->id)
+        ->pluck('id');
 
         $alreadyAllocatedStudentIds = ExamHallAllocationStudent::whereIn('allocation_id', $allExamAllocationIds)
             ->pluck('student_id')
@@ -213,7 +218,7 @@ class CommonHallController extends Controller
                     $currentHallStudentIds
                 ));
 
-                $students = Student::where('class_id', $subjectClassId)
+                $students = Student::whereIn('class_name', $classNames)
                     ->when($examSemester, function ($query) use ($examSemester) {
                         $query->where('current_semester', $examSemester);
                     })
@@ -243,7 +248,7 @@ class CommonHallController extends Controller
                     $otherExamStudentIds
                 ));
 
-                $students = Student::where('class_id', $subjectClassId)
+                $students = Student::whereIn('class_name', $classNames)
                     ->when($examSemester, function ($query) use ($examSemester) {
                         $query->where('current_semester', $examSemester);
                     })
@@ -254,7 +259,7 @@ class CommonHallController extends Controller
                 $existingAllocations = $otherExamAllocations;
             }
         } else {
-            $students = Student::where('class_id', $subjectClassId)
+            $students = Student::whereIn('class_name', $classNames)
                 ->when($examSemester, function ($query) use ($examSemester) {
                     $query->where('current_semester', $examSemester);
                 })
