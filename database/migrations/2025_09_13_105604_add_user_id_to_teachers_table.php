@@ -6,23 +6,31 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
-        Schema::table('teachers', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->nullable()->after('id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('teachers', 'user_id')) {
+
+            Schema::table('teachers', function (Blueprint $table) {
+
+                $table->unsignedBigInteger('user_id')
+                      ->nullable()
+                      ->after('id');
+
+            });
+
+        }
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::table('teachers', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
-        });
-    }
+        if (Schema::hasColumn('teachers', 'user_id')) {
 
+            Schema::table('teachers', function (Blueprint $table) {
+
+                $table->dropColumn('user_id');
+
+            });
+
+        }
+    }
 };

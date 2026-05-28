@@ -11,38 +11,53 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Check if table already exists before creating [citation:5][citation:8]
+        // CHECK TABLE EXISTS
         if (!Schema::hasTable('attendances')) {
+
             Schema::create('attendances', function (Blueprint $table) {
+
                 $table->id();
-                $table->unsignedBigInteger('teacher_id');
-                $table->unsignedBigInteger('student_id');
-                $table->unsignedBigInteger('allocation_id');
-                $table->unsignedBigInteger('exam_id');
-                $table->unsignedBigInteger('hall_id');
+
+                // SAFE BIGINTS
+                $table->unsignedBigInteger('teacher_id')->nullable();
+
+                $table->unsignedBigInteger('student_id')->nullable();
+
+                $table->unsignedBigInteger('allocation_id')->nullable();
+
+                $table->unsignedBigInteger('exam_id')->nullable();
+
+                $table->unsignedBigInteger('hall_id')->nullable();
+
                 $table->date('exam_date');
-                $table->string('session', 20); // FN, AN
-                $table->enum('status', ['present', 'absent', 'late'])->default('absent');
+
+                $table->string('session', 20);
+
+                $table->enum('status', ['present', 'absent', 'late'])
+                    ->default('absent');
+
                 $table->text('remarks')->nullable();
+
                 $table->unsignedBigInteger('marked_by')->nullable();
+
                 $table->timestamp('marked_at')->nullable();
+
                 $table->timestamps();
+
                 $table->softDeletes();
 
-                // Foreign key constraints
-                $table->foreign('teacher_id')->references('id')->on('teachers')->onDelete('cascade');
-                $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-                $table->foreign('allocation_id')->references('id')->on('exam_hall_allocations')->onDelete('cascade');
-                $table->foreign('exam_id')->references('id')->on('exams')->onDelete('cascade');
-                $table->foreign('hall_id')->references('id')->on('halls')->onDelete('cascade');
-
-                // Indexes for better performance
+                // INDEXES
                 $table->index(['exam_date', 'session']);
+
                 $table->index(['allocation_id', 'student_id']);
+
                 $table->index('status');
-                
-                // Unique constraint to prevent duplicate attendance
-                $table->unique(['allocation_id', 'student_id'], 'unique_attendance_per_student');
+
+                // UNIQUE
+                $table->unique(
+                    ['allocation_id', 'student_id'],
+                    'unique_attendance_per_student'
+                );
             });
         }
     }
@@ -52,6 +67,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendances'); // Safely drop if exists [citation:10]
+        Schema::dropIfExists('attendances');
     }
 };

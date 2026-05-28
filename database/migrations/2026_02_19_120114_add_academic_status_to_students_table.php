@@ -8,23 +8,63 @@ return new class extends Migration
 {
     public function up()
     {
+        // CHECK TABLE EXISTS
+        if (!Schema::hasTable('students')) {
+            return;
+        }
+
         Schema::table('students', function (Blueprint $table) {
+
+            // CURRENT SEMESTER
             if (!Schema::hasColumn('students', 'current_semester')) {
-                $table->integer('current_semester')->nullable()->after('user_id')->default(1);
+
+                $table->integer('current_semester')
+                    ->nullable()
+                    ->default(1);
+
             }
+
+            // CURRENT YEAR
             if (!Schema::hasColumn('students', 'current_year')) {
-                $table->integer('current_year')->nullable()->after('current_semester')->default(1);
+
+                $table->integer('current_year')
+                    ->nullable()
+                    ->default(1);
+
             }
+
+            // STATUS
             if (!Schema::hasColumn('students', 'status')) {
-                $table->string('status')->nullable()->after('current_year')->default('active');
+
+                $table->string('status')
+                    ->nullable()
+                    ->default('active');
+
             }
+
         });
     }
 
     public function down()
     {
+        if (!Schema::hasTable('students')) {
+            return;
+        }
+
         Schema::table('students', function (Blueprint $table) {
-            $table->dropColumn(['current_semester', 'current_year', 'status']);
+
+            if (Schema::hasColumn('students', 'current_semester')) {
+                $table->dropColumn('current_semester');
+            }
+
+            if (Schema::hasColumn('students', 'current_year')) {
+                $table->dropColumn('current_year');
+            }
+
+            if (Schema::hasColumn('students', 'status')) {
+                $table->dropColumn('status');
+            }
+
         });
     }
 };

@@ -8,16 +8,36 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // SKIP IF TABLE ALREADY EXISTS
+        if (Schema::hasTable('hall_allocations')) {
+            return;
+        }
+
         Schema::create('hall_allocations', function (Blueprint $table) {
+
             $table->id();
-            $table->foreignId('exam_timetable_id')->constrained('exam_timetables')->onDelete('cascade');
-            $table->foreignId('exam_hall_id')->constrained()->onDelete('cascade');
-            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
-            $table->string('teacher_role')->default('invigilator'); // invigilator, chief_invigilator
+
+            $table->unsignedBigInteger('exam_timetable_id')->nullable();
+
+            $table->unsignedBigInteger('exam_hall_id')->nullable();
+
+            $table->unsignedBigInteger('teacher_id')->nullable();
+
+            $table->string('teacher_role')
+                ->default('invigilator');
+
             $table->timestamps();
-            
-            $table->unique(['exam_timetable_id', 'exam_hall_id']);
-            $table->unique(['exam_timetable_id', 'teacher_id']);
+
+            $table->unique([
+                'exam_timetable_id',
+                'exam_hall_id'
+            ]);
+
+            $table->unique([
+                'exam_timetable_id',
+                'teacher_id'
+            ]);
+
         });
     }
 
