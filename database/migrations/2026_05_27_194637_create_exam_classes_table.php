@@ -7,28 +7,33 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Run migrations.
      */
     public function up(): void
     {
-        Schema::create('exam_classes', function (Blueprint $table) {
-            $table->id();
+        // CREATE ONLY IF NOT EXISTS
+        if (!Schema::hasTable('exam_classes')) {
 
-            $table->unsignedBigInteger('exam_id');
+            Schema::create('exam_classes', function (Blueprint $table) {
 
-            $table->string('class_name');
+                $table->id();
 
-            $table->timestamps();
+                $table->unsignedBigInteger('exam_id')->nullable();
 
-            $table->foreign('exam_id')
-                  ->references('id')
-                  ->on('exams')
-                  ->onDelete('cascade');
-        });
+                $table->string('class_name');
+
+                $table->timestamps();
+
+                // INDEX
+                $table->index('exam_id');
+
+            });
+
+        }
     }
 
     /**
-     * Reverse the migrations.
+     * Reverse migrations.
      */
     public function down(): void
     {
