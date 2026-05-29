@@ -133,16 +133,6 @@ if ($request->exam_id) {
     $classNames = ExamClass::where('exam_id', $selectedExam->id)
         ->pluck('class_name')
         ->toArray();
-   dd([
-    'selected_exam' => $selectedExam->id,
-    'class_names' => $classNames,
-
-    'students_count' => Student::whereIn('class_name', $classNames)->count(),
-
-    'students' => Student::whereIn('class_name', $classNames)
-        ->take(10)
-        ->get(['id', 'name', 'class_name', 'roll_no']),
-]);
 
     $examSemester = $selectedExam->sem
         ?? $selectedExam->semester
@@ -229,12 +219,9 @@ if ($request->exam_id) {
                 ));
 
                 $students = Student::whereIn('class_name', $classNames)
-                    ->when($examSemester, function ($query) use ($examSemester) {
-                        $query->where('current_semester', $examSemester);
-                    })
-                    ->whereNotIn('id', $occupiedStudentIds)
-                    ->orderBy('roll_no')
-                    ->get();
+    ->whereNotIn('id', $occupiedStudentIds)
+    ->orderBy('roll_no')
+    ->get();
 
                 $currentExamAllocations = $allocatedStudents->map(function ($allocation) {
                     return [
@@ -259,12 +246,9 @@ if ($request->exam_id) {
                 ));
 
                 $students = Student::whereIn('class_name', $classNames)
-                    ->when($examSemester, function ($query) use ($examSemester) {
-                        $query->where('current_semester', $examSemester);
-                    })
-                    ->whereNotIn('id', $occupiedStudentIds)
-                    ->orderBy('roll_no')
-                    ->get();
+    ->whereNotIn('id', $occupiedStudentIds)
+    ->orderBy('roll_no')
+    ->get();
 
                 $existingAllocations = $otherExamAllocations;
             }
@@ -278,6 +262,10 @@ if ($request->exam_id) {
                 ->get();
         }
     }
+
+    \Log::info('Students Loaded: '.$students->count());
+
+    
 
     return view('admin.exam_allocation.create', compact(
         'examDates',
