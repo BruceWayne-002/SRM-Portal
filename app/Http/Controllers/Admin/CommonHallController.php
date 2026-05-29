@@ -135,7 +135,13 @@ if ($request->exam_id) {
         ->toArray();
     dd([
     'selected_exam' => $selectedExam,
-    'class_names' => $classNames
+    'class_names' => $classNames,
+
+    'students_count' => Student::whereIn('class', $classNames)->count(),
+
+    'students' => Student::whereIn('class', $classNames)
+        ->take(10)
+        ->get(),
 ]);
 
     $examSemester = $selectedExam->sem
