@@ -133,15 +133,15 @@ if ($request->exam_id) {
     $classNames = ExamClass::where('exam_id', $selectedExam->id)
         ->pluck('class_name')
         ->toArray();
-    dd([
-    'selected_exam' => $selectedExam,
+   dd([
+    'selected_exam' => $selectedExam->id,
     'class_names' => $classNames,
 
-    'students_count' => Student::whereIn('class', $classNames)->count(),
+    'students_count' => Student::whereIn('class_name', $classNames)->count(),
 
-    'students' => Student::whereIn('class', $classNames)
+    'students' => Student::whereIn('class_name', $classNames)
         ->take(10)
-        ->get(),
+        ->get(['id', 'name', 'class_name', 'roll_no']),
 ]);
 
     $examSemester = $selectedExam->sem
