@@ -133,6 +133,10 @@ if ($request->exam_id) {
     $classNames = ExamClass::where('exam_id', $selectedExam->id)
         ->pluck('class_name')
         ->toArray();
+    dd([
+    'selected_exam' => $selectedExam,
+    'class_names' => $classNames
+]);
 
     $examSemester = $selectedExam->sem
         ?? $selectedExam->semester
