@@ -150,6 +150,41 @@
     </small>
 </div>
 
+
+<div class="col-md-6 col-lg-2">
+    <label class="form-label fw-semibold text-secondary">
+        <i class="bi bi-mortarboard-fill me-1"></i>Select Year
+    </label>
+
+    <select name="year"
+            class="form-select form-select-lg"
+            onchange="this.form.submit()">
+
+        <option value="">-- All Years --</option>
+
+        <option value="1" {{ request('year') == '1' ? 'selected' : '' }}>
+            1st Year
+        </option>
+
+        <option value="2" {{ request('year') == '2' ? 'selected' : '' }}>
+            2nd Year
+        </option>
+
+        <option value="3" {{ request('year') == '3' ? 'selected' : '' }}>
+            3rd Year
+        </option>
+
+        <option value="4" {{ request('year') == '4' ? 'selected' : '' }}>
+            4th Year
+        </option>
+    </select>
+</div>
+
+
+
+
+
+
                 </form>
             </div>
         </div>
@@ -206,19 +241,23 @@
                             <div id="studentList" class="list-group list-group-flush" style="max-height:520px; overflow-y:auto;">
                                  
 
-                            @php
+                           @php
 
 if(request('course')) {
-
     $students = $students->filter(function($student) {
-
         return $student->class_name == request('course');
-
     });
+}
 
+if(request('year')) {
+    $students = $students->filter(function($student) {
+        return $student->current_year == request('year');
+    });
 }
 
 @endphp
+
+
 
 
 
